@@ -1,0 +1,25 @@
+# Build output
+build/bin/
+build/obj/
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+
+# Runtime CSV database (optional — keep if you want sample data committed)
+# students.csv
+students.csv.tmp
+
+# IDE / OS files
+.vs/
+*.user
+*.suo
+.vscode/
+*.DS_Store
+Thumbs.db
+
+# Temp files
+*.tmp
+*.bak
