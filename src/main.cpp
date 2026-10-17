@@ -3,7 +3,6 @@
 // =============================================================================
 #include "MenuController.h"
 #include <iostream>
-#include <stdexcept>
 
 // Enable ANSI Virtual Terminal Processing on Windows
 #ifdef _WIN32

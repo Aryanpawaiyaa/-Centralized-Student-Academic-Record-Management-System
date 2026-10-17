@@ -1,0 +1,22 @@
+[
+  {
+    "directory": "e:/MITS/SEMESTER 3/Academic Management System/Academic CLI codebase",
+    "command": "cl /std:c++17 /EHsc /W3 /O2 /Iinclude /c src/Student.cpp /Fo:build/obj/Student.obj",
+    "file": "src/Student.cpp"
+  },
+  {
+    "directory": "e:/MITS/SEMESTER 3/Academic Management System/Academic CLI codebase",
+    "command": "cl /std:c++17 /EHsc /W3 /O2 /Iinclude /c src/FileManager.cpp /Fo:build/obj/FileManager.obj",
+    "file": "src/FileManager.cpp"
+  },
+  {
+    "directory": "e:/MITS/SEMESTER 3/Academic Management System/Academic CLI codebase",
+    "command": "cl /std:c++17 /EHsc /W3 /O2 /Iinclude /c src/MenuController.cpp /Fo:build/obj/MenuController.obj",
+    "file": "src/MenuController.cpp"
+  },
+  {
+    "directory": "e:/MITS/SEMESTER 3/Academic Management System/Academic CLI codebase",
+    "command": "cl /std:c++17 /EHsc /W3 /O2 /Iinclude /c src/main.cpp /Fo:build/obj/main.obj",
+    "file": "src/main.cpp"
+  }
+]
