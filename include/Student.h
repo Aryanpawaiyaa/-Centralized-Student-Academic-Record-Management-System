@@ -6,10 +6,6 @@
 
 #include <string>
 #include <vector>
-#include <sstream>
-#include <iomanip>
-#include <stdexcept>
-
 // ---------------------------------------------------------------------------
 //  Subject — lightweight value object for one subject's data
 // ---------------------------------------------------------------------------
