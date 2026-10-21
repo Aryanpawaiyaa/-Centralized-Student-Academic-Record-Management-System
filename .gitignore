@@ -1,22 +1,33 @@
 # Build output
-build/bin/
-build/obj/
+/build/
+/cmake-build-*/
+*.o
 *.exe
 *.obj
 *.pdb
 *.ilk
 *.exp
 *.lib
+*.a
+*.so
+*.dylib
+*.dll
 
-# Runtime CSV database (optional — keep if you want sample data committed)
-# students.csv
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# Runtime and generated output
 students.csv.tmp
+/exports/*.txt
 
 # IDE / OS files
 .vs/
+.vscode/
+.cache/
 *.user
 *.suo
-.vscode/
 *.DS_Store
 Thumbs.db
 

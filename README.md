@@ -1,13 +1,8 @@
 # AcademiCLI — Academic Management System
 
-> **Course**: Object-Oriented Programming | MITS Semester 3  
-> **Language**: C++17  
-> **Paradigm**: OOP with File I/O (CSV)  
-> **Build**: MSVC (VS 2022 Build Tools) / MinGW g++
-
----
-
-run this command - .\build\bin\AcademiCLI.exe
+AcademiCLI is a C++17 command-line application for managing student academic
+records. It stores student data in a CSV file and can export individual
+marksheets and class reports.
 
 ## Project Structure
 
@@ -25,14 +20,13 @@ Academic CLI codebase/
 │   ├── MenuController.cpp
 │   └── main.cpp               <- Entry point
 │
-├── build/
-│   ├── bin/AcademiCLI.exe     <- Compiled executable (after build)
-│   └── obj/                   <- Intermediate object files
-│
-├── students.csv               <- Auto-created data file (CSV database)
-├── Makefile                   <- Build with g++ (Linux/MinGW)
-├── build.bat                  <- One-click build script (Windows + g++)
-└── README.md
+├── build/                     <- Generated build files (ignored by Git)
+├── exports/                   <- Generated reports; example exports included
+├── students.csv               <- Sample CSV database
+├── CMakeLists.txt             <- CMake build configuration
+├── Makefile                   <- GNU Make build (g++)
+├── build.bat                  <- Windows build script (MSVC or MinGW)
+└── REPORT.md                  <- Project design and evaluation report
 ```
 
 ---
@@ -91,25 +85,50 @@ StudentID,FullName,TotalClasses,ClassesAttended,CS201,CS202,CS203,MA201,EC201
 
 ## Build and Run
 
-### Option A -- VS Build Tools (Windows, recommended)
+Run build and application commands from the repository root. The application
+uses relative paths for `students.csv` and `exports/`.
 
-call "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
-cl /std:c++17 /EHsc /O2 /Iinclude src\*.cpp /Fe:build\bin\AcademiCLI.exe
-.\build\bin\AcademiCLI.exe
+### Windows
 
-### Option C -- CMake (Cross-platform, Recommended)
+The build script detects MSVC or MinGW and offers to launch the program:
 
-```bash
-cmake -B build
-cmake --build build --config Release
-.\build\bin\AcademiCLI.exe
+```bat
+build.bat
 ```
 
-### Option D -- GNU Make (Linux / WSL)
+Or build with CMake:
 
-make (builds to build/bin/AcademiCLI)
-make run (build + launch)
-make clean (remove build/ directory)
+```powershell
+cmake -S . -B build
+cmake --build build --config Release
+```
+
+With a Visual Studio generator, run
+`.\build\bin\Release\AcademiCLI.exe`; single-configuration generators place the
+executable at `.\build\bin\AcademiCLI.exe`.
+
+### GNU Make (Linux, macOS, or MinGW)
+
+Requires `g++` and `make`.
+
+```sh
+make
+./build/bin/AcademiCLI
+```
+
+Use `make run` to build and launch, or `make clean` to remove the generated
+`build/` directory.
+
+## Local and Generated Files
+
+- `students.csv` is a checked-in sample database. Running the application can
+  change it, so preserve or copy the sample before experimenting with edits.
+- The application writes report files under `exports/`. Existing example
+  exports are tracked; newly generated `.txt` exports are ignored by Git.
+- Build directories, compiler outputs, CMake intermediates, and IDE caches are
+  ignored. The ignore rules do not hide changes to already tracked sample files.
+
+See [REPORT.md](REPORT.md) for the project design and evaluation details.
 
 ---
 
