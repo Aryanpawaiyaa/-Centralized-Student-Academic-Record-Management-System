@@ -31,6 +31,11 @@ public:
     // (used after update / delete to guarantee file consistency).
     bool rewriteAll(const std::map<std::string, Student>& data);
 
+    // ── Export / Print helpers ─────────────────────────────────────────────
+    bool exportMarksheet(const Student& s, const std::string& destinationFile) const;
+    bool exportClassRoster(const std::map<std::string, Student>& data, const std::string& destinationFile) const;
+    bool exportAllMarksheets(const std::map<std::string, Student>& data, const std::string& destinationFile) const;
+
     // ── Utility ───────────────────────────────────────────────────────────
     const std::string& getFilePath() const { return filePath_; }
 

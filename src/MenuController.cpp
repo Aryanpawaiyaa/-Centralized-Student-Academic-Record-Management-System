@@ -28,13 +28,9 @@ namespace Color {
 }
 
 // ---------------------------------------------------------------------------
-//  Constructor  —  enables VT-100 on Windows and loads data
+//  Constructor  —  loads persisted data from storage
 // ---------------------------------------------------------------------------
 MenuController::MenuController() {
-#ifdef _WIN32
-    // Enable ANSI escape codes on Windows 10+
-    system("chcp 65001 > nul");    // UTF-8 code page
-#endif
     int n = fm_.loadAll(students_);
     std::cout << Color::GREEN << "\n  [OK] Loaded " << n
               << " record(s) from \"" << fm_.getFilePath() << "\".\n"
@@ -53,16 +49,17 @@ void MenuController::run() {
         printHeader_();
         showMainMenu_();
 
-        int choice = inputInt_("\n  Enter choice", 0, 7);
+        int choice = inputInt_("\n  Enter choice", 0, 8);
 
         switch (choice) {
-            case 1: handleAddStudent_();    break;
-            case 2: handleSearchStudent_(); break;
-            case 3: handleUpdateStudent_(); break;
-            case 4: handleDeleteStudent_(); break;
-            case 5: handleReportCard_();    break;
-            case 6: handleClassSummary_();  break;
-            case 7: handleTopPerformers_(); break;
+            case 1: handleAddStudent_();     break;
+            case 2: handleSearchStudent_();  break;
+            case 3: handleUpdateStudent_();  break;
+            case 4: handleDeleteStudent_();  break;
+            case 5: handleReportCard_();     break;
+            case 6: handleClassSummary_();   break;
+            case 7: handleTopPerformers_();  break;
+            case 8: handlePrintAndExport_(); break;
             case 0:
                 clearScreen_();
                 std::cout << Color::CYAN
@@ -82,11 +79,8 @@ void MenuController::run() {
 // ===========================================================================
 
 void MenuController::clearScreen_() const {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    // Fast VT-100 screen clear without external shell subprocess
+    std::cout << "\033[2J\033[H" << std::flush;
 }
 
 void MenuController::printHeader_() const {
@@ -154,7 +148,7 @@ void MenuController::showBanner_() const {
   ║       ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝     ╚═╝╚═╝               ║
   ║                                                                              ║
   ║              C L I   —   Academic Management System  v1.0                   ║
-  ║                     Manipal Institute of Technology                          ║
+  ║                  Madhav Institute of Technology and Science                  ║
   ║                            Semester 3  |  2024                               ║
   ╚══════════════════════════════════════════════════════════════════════════════╝
 )" << Color::RESET;
@@ -174,8 +168,8 @@ void MenuController::showMainMenu_() const {
               << Color::RESET;
 
     std::cout << Color::CYAN
-              << "  Students in database: " << Color::YELLOW << total
-              << Color::CYAN << "  |  File: " << Color::DIM << fm_.getFilePath()
+              << "  Total Students Enrolled: " << Color::BOLD << Color::YELLOW << total << Color::RESET
+              << Color::CYAN << "  |  Storage: " << Color::DIM << fm_.getFilePath()
               << Color::RESET << "\n\n";
 
     auto opt = [&](const char* num, const char* label, const char* col){
@@ -183,15 +177,16 @@ void MenuController::showMainMenu_() const {
                   << "  " << label << Color::RESET << "\n";
     };
 
-    opt("1", "Add New Student          ", Color::GREEN);
-    opt("2", "Search Student by ID     ", Color::CYAN);
-    opt("3", "Update Student Record    ", Color::YELLOW);
-    opt("4", "Delete Student Record    ", Color::RED);
-    opt("5", "Print Student Report Card", Color::MAGENTA);
-    opt("6", "Class Summary Report     ", Color::BLUE);
-    opt("7", "Top Performers           ", Color::CYAN);
+    opt("1", "Add New Student                  ", Color::GREEN);
+    opt("2", "Search Student by ID             ", Color::CYAN);
+    opt("3", "Update Student Record            ", Color::YELLOW);
+    opt("4", "Delete Student Record            ", Color::RED);
+    opt("5", "Student Report Card (View/Print) ", Color::MAGENTA);
+    opt("6", "Class Summary & Grade Histogram  ", Color::BLUE);
+    opt("7", "Top Performers Leaderboard       ", Color::CYAN);
+    opt("8", "Print / Export Marksheets & List ", Color::GREEN);
     std::cout << "\n";
-    opt("0", "Exit Application         ", Color::DIM);
+    opt("0", "Exit Application                 ", Color::DIM);
 }
 
 // ===========================================================================
@@ -444,7 +439,7 @@ void MenuController::handleReportCard_() {
     printSeparator_('=', 80);
     std::cout << Color::BOLD << Color::WHITE
               << "\n              ACADEMIC REPORT CARD\n"
-              << "         Manipal Institute of Technology\n\n"
+              << "   Madhav Institute of Technology and Science\n\n"
               << Color::RESET;
 
     std::cout << std::left
@@ -455,10 +450,13 @@ void MenuController::handleReportCard_() {
     double attPct = s.getAttendancePct();
     std::cout << Color::CYAN << "  Attendance  : "
               << (attPct >= 75.0 ? Color::GREEN : Color::RED)
+              << Student::renderProgressBar(attPct, 12) << " "
               << std::fixed << std::setprecision(1) << attPct << "% "
               << "(" << s.getClassesAttended() << "/" << s.getTotalClasses() << " classes)";
     if (attPct < 75.0)
         std::cout << Color::RED << "  ← NOT ELIGIBLE";
+    else
+        std::cout << Color::GREEN << "  ← ELIGIBLE";
     std::cout << Color::RESET << "\n\n";
 
     // Marks table
@@ -504,14 +502,24 @@ void MenuController::handleReportCard_() {
                            (lg == 'C') ? Color::YELLOW :
                            (lg == 'D') ? Color::MAGENTA: Color::RED;
 
-    std::cout << "\n  " << Color::WHITE << std::left << std::setw(36) << "Aggregate Percentage"
-              << gradeCol << std::setw(10) << std::fixed << std::setprecision(2) << agg << "%"
+    std::cout << "\n  " << Color::WHITE << std::left << std::setw(30) << "Aggregate Percentage"
+              << gradeCol << Student::renderProgressBar(agg, 12) << " "
+              << std::setw(8) << std::fixed << std::setprecision(2) << agg << "%"
               << Color::RESET << "\n"
-              << "  " << Color::WHITE << std::setw(36) << "Final Grade"
+              << "  " << Color::WHITE << std::setw(30) << "Final Grade"
               << gradeCol << lg << "  (" << s.getGradeLabel() << ")\n"
               << Color::RESET;
 
     printSeparator_('=', 80);
+
+    if (confirm_("Print / Export this marksheet to file?")) {
+        std::string path = "exports/marksheet_" + s.getId() + ".txt";
+        if (fm_.exportMarksheet(s, path)) {
+            printSuccess_("Marksheet exported successfully to: \"" + path + "\"");
+        } else {
+            printError_("Failed to export marksheet to file.");
+        }
+    }
 }
 
 // ── 6. Class Summary ────────────────────────────────────────────────────────
@@ -526,6 +534,10 @@ void MenuController::handleClassSummary_() {
         return;
     }
 
+    int n = static_cast<int>(students_.size());
+    std::cout << Color::CYAN << "  Total Registered Students: "
+              << Color::BOLD << Color::YELLOW << n << Color::RESET << "\n";
+
     printTableHeader_();
     for (const auto& kv : students_)
         printStudentRow_(kv.second);
@@ -534,27 +546,60 @@ void MenuController::handleClassSummary_() {
     // Statistics
     double totalAgg = 0.0;
     int    eligible = 0, passCount = 0;
+    const Student* topStudent = nullptr;
+    const Student* lowStudent = nullptr;
+
     for (const auto& kv : students_) {
-        totalAgg += kv.second.getAggregate();
+        double agg = kv.second.getAggregate();
+        totalAgg += agg;
         if (kv.second.isEligible()) ++eligible;
         if (kv.second.getLetterGrade() != 'F') ++passCount;
-    }
-    int n = static_cast<int>(students_.size());
 
-    std::cout << "\n  " << Color::BOLD << Color::WHITE << "── Statistics ─────────────────────────────────────────\n"
+        if (!topStudent || agg > topStudent->getAggregate())
+            topStudent = &kv.second;
+        if (!lowStudent || agg < lowStudent->getAggregate())
+            lowStudent = &kv.second;
+    }
+
+    std::cout << "\n  " << Color::BOLD << Color::WHITE << "── Academic Summary & Statistics ──────────────────────\n"
               << Color::RESET;
     std::cout << Color::CYAN
-              << "  Total Students    : " << Color::WHITE << n << "\n"
+              << "  Total Students Enrolled : " << Color::BOLD << Color::WHITE << n << "\n"
               << Color::CYAN
-              << "  Class Average     : " << Color::WHITE
+              << "  Class Mean Average      : " << Color::WHITE
               << std::fixed << std::setprecision(2) << (totalAgg / n) << "%\n"
               << Color::CYAN
-              << "  Eligible Students : " << Color::GREEN << eligible
+              << "  Eligible for Exams      : " << Color::GREEN << eligible
               << Color::DIM << " (" << std::setprecision(1) << (100.0*eligible/n) << "% attendance ≥ 75%)\n"
               << Color::CYAN
-              << "  Passed Students   : " << Color::GREEN << passCount
-              << Color::DIM << " (" << std::setprecision(1) << (100.0*passCount/n) << "% pass rate)\n"
-              << Color::RESET;
+              << "  Detained (Low Attend)   : " << Color::RED << (n - eligible)
+              << Color::DIM << " (" << std::setprecision(1) << (100.0*(n - eligible)/n) << "%)\n"
+              << Color::CYAN
+              << "  Overall Pass Rate       : " << Color::GREEN << passCount
+              << Color::DIM << " (" << std::setprecision(1) << (100.0*passCount/n) << "% pass rate)\n";
+
+    if (topStudent) {
+        std::cout << Color::CYAN << "  Highest Scorer          : " << Color::YELLOW
+                  << topStudent->getName() << " (" << std::fixed << std::setprecision(2)
+                  << topStudent->getAggregate() << "%)\n";
+    }
+    if (lowStudent) {
+        std::cout << Color::CYAN << "  Lowest Scorer           : " << Color::DIM
+                  << lowStudent->getName() << " (" << std::fixed << std::setprecision(2)
+                  << lowStudent->getAggregate() << "%)\n";
+    }
+    std::cout << Color::RESET;
+
+    printGradeHistogram_();
+
+    if (confirm_("Print / Export complete class roster to file?")) {
+        std::string path = "exports/academic_class_roster.txt";
+        if (fm_.exportClassRoster(students_, path)) {
+            printSuccess_("Complete class roster exported to: \"" + path + "\"");
+        } else {
+            printError_("Failed to export class roster.");
+        }
+    }
 }
 
 // ── 7. Top Performers ───────────────────────────────────────────────────────
@@ -610,8 +655,10 @@ void MenuController::printStudentCard_(const Student& s) const {
     double att = s.getAttendancePct();
     std::cout << Color::CYAN << "  Attend: "
               << (att >= 75.0 ? Color::GREEN : Color::RED)
+              << Student::renderProgressBar(att, 10) << " "
               << std::fixed << std::setprecision(1) << att << "%  "
-              << "(" << s.getClassesAttended() << "/" << s.getTotalClasses() << ")"
+              << "(" << s.getClassesAttended() << "/" << s.getTotalClasses() << " classes)"
+              << (att >= 75.0 ? "  [ELIGIBLE]" : "  [DETAINED]")
               << Color::RESET << "\n";
 
     std::cout << Color::CYAN << "  Marks : " << Color::RESET;
@@ -628,7 +675,8 @@ void MenuController::printStudentCard_(const Student& s) const {
                      (lg == 'D') ? Color::MAGENTA: Color::RED;
 
     std::cout << Color::CYAN << "  Aggr  : "
-              << gc << std::fixed << std::setprecision(2) << agg << "%"
+              << gc << Student::renderProgressBar(agg, 10) << " "
+              << std::fixed << std::setprecision(2) << agg << "%"
               << "  Grade: " << lg << " (" << s.getGradeLabel() << ")"
               << Color::RESET << "\n";
     printSeparator_('-', 70);
@@ -670,4 +718,110 @@ void MenuController::printStudentRow_(const Student& s) const {
 
 void MenuController::printTableFooter_() const {
     printSeparator_('-', 80);
+}
+
+// ---------------------------------------------------------------------------
+//  printGradeHistogram_ — renders visual bar distribution
+// ---------------------------------------------------------------------------
+void MenuController::printGradeHistogram_() const {
+    if (students_.empty()) return;
+
+    int countA = 0, countB = 0, countC = 0, countD = 0, countF = 0;
+    for (const auto& kv : students_) {
+        switch (kv.second.getLetterGrade()) {
+            case 'A': ++countA; break;
+            case 'B': ++countB; break;
+            case 'C': ++countC; break;
+            case 'D': ++countD; break;
+            default:  ++countF; break;
+        }
+    }
+
+    int total = static_cast<int>(students_.size());
+    std::cout << "\n  " << Color::BOLD << Color::WHITE
+              << "── Grade Distribution Histogram ──────────────────────\n"
+              << Color::RESET;
+
+    auto printBar = [&](const char* label, int count, const char* col) {
+        int barWidth = (total > 0) ? (count * 20 / total) : 0;
+        double pct = (total > 0) ? (100.0 * count / total) : 0.0;
+        std::cout << "  " << col << std::left << std::setw(12) << label << " "
+                  << Color::WHITE << "[";
+        for (int i = 0; i < barWidth; ++i) std::cout << "█";
+        for (int i = barWidth; i < 20; ++i) std::cout << " ";
+        std::cout << "]  " << std::right << std::setw(3) << count
+                  << "  (" << std::fixed << std::setprecision(1) << pct << "%)\n"
+                  << Color::RESET;
+    };
+
+    printBar("A (>=85%)", countA, Color::GREEN);
+    printBar("B (>=70%)", countB, Color::CYAN);
+    printBar("C (>=55%)", countC, Color::YELLOW);
+    printBar("D (>=40%)", countD, Color::MAGENTA);
+    printBar("F ( <40%)", countF, Color::RED);
+}
+
+// ===========================================================================
+//  PRINT & EXPORT CENTER
+// ===========================================================================
+
+void MenuController::handlePrintAndExport_() {
+    clearScreen_();
+    printHeader_();
+    std::cout << Color::GREEN << "\n  ── Print & Export Center ─────────────────────────\n"
+              << Color::RESET;
+
+    int total = static_cast<int>(students_.size());
+    std::cout << Color::CYAN << "  Total Enrolled Students: "
+              << Color::BOLD << Color::YELLOW << total << Color::RESET << "\n\n";
+
+    if (students_.empty()) {
+        printWarning_("Database is empty. Nothing to print or export.");
+        return;
+    }
+
+    std::cout << Color::WHITE << "  Select print / export task:\n" << Color::RESET
+              << Color::GREEN << "  [1]" << Color::WHITE << " Print / Export Single Student Marksheet\n"
+              << Color::GREEN << "  [2]" << Color::WHITE << " Export Complete Class Roster (Summary Ledger)\n"
+              << Color::GREEN << "  [3]" << Color::WHITE << " Batch Export All Student Marksheets (Unified Archive)\n"
+              << Color::GREEN << "  [0]" << Color::DIM   << " Return to Main Menu\n"
+              << Color::RESET;
+
+    int choice = inputInt_("\n  Enter selection", 0, 3);
+
+    switch (choice) {
+        case 1: {
+            std::string id = inputStudentId_(false);
+            const Student& s = students_.at(id);
+            std::string path = "exports/marksheet_" + id + ".txt";
+            if (fm_.exportMarksheet(s, path)) {
+                printSuccess_("Official marksheet exported to: \"" + path + "\"");
+                std::cout << "\n" << s.formatMarksheet() << "\n";
+            } else {
+                printError_("Failed to write marksheet file.");
+            }
+            break;
+        }
+        case 2: {
+            std::string path = "exports/academic_class_roster.txt";
+            if (fm_.exportClassRoster(students_, path)) {
+                printSuccess_("Complete class roster exported to: \"" + path + "\"");
+            } else {
+                printError_("Failed to export class roster.");
+            }
+            break;
+        }
+        case 3: {
+            std::string path = "exports/all_students_marksheets.txt";
+            if (fm_.exportAllMarksheets(students_, path)) {
+                printSuccess_("All " + std::to_string(students_.size()) + " marksheets compiled to: \"" + path + "\"");
+            } else {
+                printError_("Failed to batch export marksheets.");
+            }
+            break;
+        }
+        case 0:
+        default:
+            return;
+    }
 }

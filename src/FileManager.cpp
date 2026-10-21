@@ -5,7 +5,8 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
-#include <cstdio>        // std::rename, std::remove
+#include <iomanip>
+#include <filesystem>
 
 // ---------------------------------------------------------------------------
 //  Static members
@@ -83,12 +84,13 @@ bool FileManager::appendRecord(const Student& s) {
 }
 
 // ---------------------------------------------------------------------------
-//  rewriteAll  — atomic overwrite via a temporary file
+//  rewriteAll  — atomic overwrite via a temporary file using std::filesystem
 // ---------------------------------------------------------------------------
 bool FileManager::rewriteAll(const std::map<std::string, Student>& data) {
+    namespace fs = std::filesystem;
     // Write to .tmp first
     {
-        std::ofstream ofs(tmpFilePath_);
+        std::ofstream ofs(tmpFilePath_, std::ios::trunc);
         if (!ofs.is_open()) return false;
         writeHeader_(ofs);
         for (const auto& kv : data)
@@ -96,17 +98,120 @@ bool FileManager::rewriteAll(const std::map<std::string, Student>& data) {
         if (!ofs.good()) return false;
     } // ofs flushes and closes here
 
-    // Atomically replace original file
-    std::remove(filePath_.c_str());
-    if (std::rename(tmpFilePath_.c_str(), filePath_.c_str()) != 0) {
-        // Fallback: copy contents manually
-        std::ifstream src(tmpFilePath_);
-        std::ofstream dst(filePath_);
-        if (!src || !dst) return false;
-        dst << src.rdbuf();
-        std::remove(tmpFilePath_.c_str());
+    std::error_code ec;
+    fs::path target(filePath_);
+    fs::path temp(tmpFilePath_);
+
+    // Atomically replace original file with temp file
+    fs::rename(temp, target, ec);
+    if (ec) {
+        // Fallback for Windows if destination is locked or across volumes
+        ec.clear();
+        fs::copy_file(temp, target, fs::copy_options::overwrite_existing, ec);
+        fs::remove(temp, ec);
+        if (ec) return false;
     }
     return true;
+}
+
+// ---------------------------------------------------------------------------
+//  exportMarksheet — writes a student's marksheet to file
+// ---------------------------------------------------------------------------
+bool FileManager::exportMarksheet(const Student& s, const std::string& destinationFile) const {
+    namespace fs = std::filesystem;
+    std::error_code ec;
+    fs::path p(destinationFile);
+    if (p.has_parent_path()) {
+        fs::create_directories(p.parent_path(), ec);
+    }
+    std::ofstream ofs(destinationFile, std::ios::trunc);
+    if (!ofs.is_open()) return false;
+    ofs << s.formatMarksheet();
+    return ofs.good();
+}
+
+// ---------------------------------------------------------------------------
+//  exportClassRoster — writes comprehensive tabular ledger of all students
+// ---------------------------------------------------------------------------
+bool FileManager::exportClassRoster(const std::map<std::string, Student>& data, const std::string& destinationFile) const {
+    namespace fs = std::filesystem;
+    std::error_code ec;
+    fs::path p(destinationFile);
+    if (p.has_parent_path()) {
+        fs::create_directories(p.parent_path(), ec);
+    }
+    std::ofstream ofs(destinationFile, std::ios::trunc);
+    if (!ofs.is_open()) return false;
+
+    ofs << "========================================================================================================\n";
+    ofs << "                               MADHAV INSTITUTE OF TECHNOLOGY AND SCIENCE                               \n";
+    ofs << "                                  COMPLETE ACADEMIC CLASS ROSTER                                       \n";
+    ofs << "========================================================================================================\n\n";
+    ofs << "  Total Registered Students: " << data.size() << "\n\n";
+
+    ofs << "  " << std::left
+        << std::setw(16) << "Student ID"
+        << std::setw(24) << "Full Name"
+        << std::setw(12) << "Attend%"
+        << std::setw(12) << "Aggr%"
+        << std::setw(8)  << "Grade"
+        << std::setw(14) << "Attendance"
+        << std::setw(10) << "Result"
+        << "\n";
+    ofs << "  ------------------------------------------------------------------------------------------------------\n";
+
+    double totalAgg = 0.0;
+    int eligibleCount = 0;
+    int passCount = 0;
+
+    for (const auto& kv : data) {
+        const auto& s = kv.second;
+        totalAgg += s.getAggregate();
+        if (s.isEligible()) ++eligibleCount;
+        if (s.getLetterGrade() != 'F') ++passCount;
+
+        ofs << "  " << std::left
+            << std::setw(16) << s.getId()
+            << std::setw(24) << s.getName()
+            << std::setw(12) << (std::to_string(static_cast<int>(s.getAttendancePct())) + "%")
+            << std::setw(12) << std::fixed << std::setprecision(2) << s.getAggregate()
+            << std::setw(8)  << s.getLetterGrade()
+            << std::setw(14) << (s.isEligible() ? "Eligible" : "Detained")
+            << std::setw(10) << (s.getLetterGrade() != 'F' ? "PASS" : "FAIL")
+            << "\n";
+    }
+
+    int n = static_cast<int>(data.size());
+    ofs << "  ------------------------------------------------------------------------------------------------------\n\n";
+    ofs << "  CLASS SUMMARY METRICS\n";
+    ofs << "  Total Enrolled   : " << n << "\n";
+    if (n > 0) {
+        ofs << "  Class Average    : " << std::fixed << std::setprecision(2) << (totalAgg / n) << "%\n";
+        ofs << "  Eligible Count   : " << eligibleCount << " (" << std::fixed << std::setprecision(1) << (100.0 * eligibleCount / n) << "%)\n";
+        ofs << "  Passing Count    : " << passCount << " (" << std::fixed << std::setprecision(1) << (100.0 * passCount / n) << "%)\n";
+    }
+    ofs << "========================================================================================================\n";
+    return ofs.good();
+}
+
+// ---------------------------------------------------------------------------
+//  exportAllMarksheets — concatenates all student marksheets into one file
+// ---------------------------------------------------------------------------
+bool FileManager::exportAllMarksheets(const std::map<std::string, Student>& data, const std::string& destinationFile) const {
+    namespace fs = std::filesystem;
+    std::error_code ec;
+    fs::path p(destinationFile);
+    if (p.has_parent_path()) {
+        fs::create_directories(p.parent_path(), ec);
+    }
+    std::ofstream ofs(destinationFile, std::ios::trunc);
+    if (!ofs.is_open()) return false;
+
+    for (const auto& kv : data) {
+        ofs << kv.second.formatMarksheet();
+        ofs << "\n\n\f\n\n"; // Form feed for print pagination
+    }
+    return ofs.good();
 }
 
 // ---------------------------------------------------------------------------

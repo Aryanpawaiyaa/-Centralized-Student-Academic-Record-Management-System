@@ -97,13 +97,15 @@ call "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\
 cl /std:c++17 /EHsc /O2 /Iinclude src\*.cpp /Fe:build\bin\AcademiCLI.exe
 .\build\bin\AcademiCLI.exe
 
-### Option B -- MinGW g++ (Windows)
+### Option C -- CMake (Cross-platform, Recommended)
 
-build.bat (one-click script)
--- OR --
-g++ -std=c++17 -O2 -Iinclude src/\*.cpp -o AcademiCLI.exe
+```bash
+cmake -B build
+cmake --build build --config Release
+.\build\bin\AcademiCLI.exe
+```
 
-### Option C -- GNU Make (Linux / WSL)
+### Option D -- GNU Make (Linux / WSL)
 
 make (builds to build/bin/AcademiCLI)
 make run (build + launch)
@@ -113,18 +115,20 @@ make clean (remove build/ directory)
 
 ## Features
 
-# Feature Description
-
-1 Bootstrap Load Reads students.csv on startup; creates if missing
-2 Add Student Validates ID uniqueness, collects 5 subject marks
-3 Search by ID O(log n) lookup from in-memory std::map
-4 Update Record Modify name, attendance, or any subject mark
-5 Delete Record Removes from memory + atomically rewrites file
-6 Report Card Full per-subject grade table + aggregate + eligibility
-7 Class Summary Tabular view of all students + statistics
-8 Top Performers Sorted top-5 by aggregate percentage
-9 Input Validation Loops on invalid type/range; never crashes
-10 ANSI Colour Coding Green/Red/Cyan feedback for pass/fail/info states
+| # | Feature | Description |
+|---|---------|-------------|
+| 1 | Bootstrap Load | Reads students.csv on startup; creates if missing |
+| 2 | Add Student | Validates ID uniqueness, collects 5 subject marks |
+| 3 | Search by ID | O(log n) lookup from in-memory std::map |
+| 4 | Update Record | Modify name, attendance, or any subject mark |
+| 5 | Delete Record | Removes from memory + atomically rewrites file |
+| 6 | Report Card | Per-subject marks, progress bar, aggregate, eligibility & export to file |
+| 7 | Class Summary | Comprehensive class roster, class average, and grade distribution histogram |
+| 8 | Top Performers | Sorted leaderboard by aggregate percentage |
+| 9 | Print & Export Center | Export individual marksheets, whole class roster ledger, or batch archive to `.txt` |
+| 10 | Visual Meters | ASCII/Unicode progress bars for attendance, aggregate, and grade distribution |
+| 11 | Input Validation | Loops on invalid type/range; never crashes |
+| 12 | Instant ANSI Display | Fast VT-100 screen refresh without shell subprocess overhead |
 
 ---
 

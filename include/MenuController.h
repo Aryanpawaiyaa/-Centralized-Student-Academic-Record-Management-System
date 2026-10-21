@@ -75,10 +75,12 @@ private:
     void handleReportCard_();
     void handleClassSummary_();
     void handleTopPerformers_();
+    void handlePrintAndExport_();
 
     // ── Display helpers ───────────────────────────────────────────────────
     void printStudentCard_(const Student& s) const;
     void printStudentRow_ (const Student& s) const;
+    void printGradeHistogram_()              const;
     void printTableHeader_()                 const;
     void printTableFooter_()                 const;
     void printSeparator_(const char* pattern, int repeat = 78) const;

@@ -5,7 +5,9 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <vector>
+#include <algorithm>
 // ---------------------------------------------------------------------------
 //  Subject — lightweight value object for one subject's data
 // ---------------------------------------------------------------------------
@@ -63,6 +65,10 @@ public:
     char        getLetterGrade()    const;  // A B C D F
     std::string getGradeLabel()     const;  // "Excellent", "Good", …
     bool        isEligible()        const;  // attendance >= 75%
+
+    // ── Visual / Output helpers ───────────────────────────────────────────
+    static std::string renderProgressBar(double percentage, int width = 12);
+    std::string formatMarksheet() const;
 
     // ── Serialisation ─────────────────────────────────────────────────────
     // Converts to a single CSV line (no newline appended)

@@ -1,0 +1,19 @@
+========================================================================================================
+                               MADHAV INSTITUTE OF TECHNOLOGY AND SCIENCE                               
+                                  COMPLETE ACADEMIC CLASS ROSTER                                       
+========================================================================================================
+
+  Total Registered Students: 2
+
+  Student ID      Full Name               Attend%     Aggr%       Grade   Attendance    Result    
+  ------------------------------------------------------------------------------------------------------
+  BTCB25O1028     Aryan Narwariya         33%         45.00       D       Detained      PASS      
+  BTCB25O1043     charitra yogi           88%         96.40       A       Eligible      PASS      
+  ------------------------------------------------------------------------------------------------------
+
+  CLASS SUMMARY METRICS
+  Total Enrolled   : 2
+  Class Average    : 70.70%
+  Eligible Count   : 1 (50.0%)
+  Passing Count    : 2 (100.0%)
+========================================================================================================

@@ -4,24 +4,28 @@
 #include "MenuController.h"
 #include <iostream>
 
-// Enable ANSI Virtual Terminal Processing on Windows
+// Enable ANSI Virtual Terminal Processing and UTF-8 on Windows
 #ifdef _WIN32
   #define WIN32_LEAN_AND_MEAN
   #include <windows.h>
 
-  static void enableWindowsANSI() {
+  static void configureWindowsConsole() {
       HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-      if (hOut == INVALID_HANDLE_VALUE) return;
-      DWORD dwMode = 0;
-      if (!GetConsoleMode(hOut, &dwMode)) return;
-      dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-      SetConsoleMode(hOut, dwMode);
+      if (hOut != INVALID_HANDLE_VALUE) {
+          DWORD dwMode = 0;
+          if (GetConsoleMode(hOut, &dwMode)) {
+              dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+              SetConsoleMode(hOut, dwMode);
+          }
+      }
+      SetConsoleOutputCP(CP_UTF8);
+      SetConsoleCP(CP_UTF8);
   }
 #endif
 
 int main() {
 #ifdef _WIN32
-    enableWindowsANSI();
+    configureWindowsConsole();
 #endif
 
     try {

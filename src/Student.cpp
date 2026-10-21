@@ -5,6 +5,8 @@
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
+#include <iomanip>
+#include <algorithm>
 
 // ---------------------------------------------------------------------------
 //  Static data
@@ -103,6 +105,78 @@ std::string Student::getGradeLabel() const {
 // ---------------------------------------------------------------------------
 bool Student::isEligible() const {
     return getAttendancePct() >= 75.0;
+}
+
+// ---------------------------------------------------------------------------
+//  renderProgressBar — visual block meter [██████░░░░]
+// ---------------------------------------------------------------------------
+std::string Student::renderProgressBar(double percentage, int width) {
+    if (width <= 0) width = 10;
+    double clamped = (percentage < 0.0) ? 0.0 : (percentage > 100.0 ? 100.0 : percentage);
+    int filled = static_cast<int>((clamped / 100.0) * width);
+    if (filled > width) filled = width;
+
+    std::string bar = "[";
+    for (int i = 0; i < filled; ++i) bar += "█";
+    for (int i = filled; i < width; ++i) bar += "░";
+    bar += "]";
+    return bar;
+}
+
+// ---------------------------------------------------------------------------
+//  formatMarksheet — formal printable marksheet layout
+// ---------------------------------------------------------------------------
+std::string Student::formatMarksheet() const {
+    std::ostringstream oss;
+    oss << "================================================================================\n";
+    oss << "                   MADHAV INSTITUTE OF TECHNOLOGY AND SCIENCE                   \n";
+    oss << "                          OFFICIAL ACADEMIC MARKSHEET                           \n";
+    oss << "================================================================================\n\n";
+    oss << "  Student ID       : " << id_ << "\n";
+    oss << "  Student Name     : " << name_ << "\n";
+    oss << "  Academic Session : Semester 3 (2024-2025)\n";
+    oss << "  Department       : Computer Science & Academic Management\n";
+    oss << "--------------------------------------------------------------------------------\n";
+    oss << "  ATTENDANCE RECORD\n";
+    oss << "  Total Classes    : " << totalClasses_ << "\n";
+    oss << "  Classes Attended : " << classesAttended_ << "\n";
+    oss << "  Attendance Pct   : " << std::fixed << std::setprecision(1) << getAttendancePct() << "%\n";
+    oss << "  Eligibility      : " << (isEligible() ? "ELIGIBLE FOR SEMESTER EXAMINATIONS" : "DETAINED (Attendance < 75%)") << "\n";
+    oss << "--------------------------------------------------------------------------------\n";
+    oss << "  COURSE PERFORMANCE & MARKS EVALUATION\n\n";
+    oss << "  " << std::left
+        << std::setw(10) << "Course"
+        << std::setw(30) << "Subject Name"
+        << std::setw(12) << "Max Marks"
+        << std::setw(12) << "Scored"
+        << std::setw(10) << "Grade"
+        << "\n";
+    oss << "  ----------------------------------------------------------------------------\n";
+    for (const auto& s : subjects_) {
+        char g;
+        if      (s.marks >= GRADE_A) g = 'A';
+        else if (s.marks >= GRADE_B) g = 'B';
+        else if (s.marks >= GRADE_C) g = 'C';
+        else if (s.marks >= GRADE_D) g = 'D';
+        else                         g = 'F';
+
+        oss << "  " << std::left
+            << std::setw(10) << s.code
+            << std::setw(30) << s.name
+            << std::setw(12) << "100.00"
+            << std::setw(12) << std::fixed << std::setprecision(2) << s.marks
+            << std::setw(10) << g
+            << "\n";
+    }
+    oss << "  ----------------------------------------------------------------------------\n";
+    oss << "  Aggregate Percentage : " << std::fixed << std::setprecision(2) << getAggregate() << "%\n";
+    oss << "  Final Letter Grade   : " << getLetterGrade() << " (" << getGradeLabel() << ")\n";
+    oss << "  Result Status        : " << (getLetterGrade() != 'F' ? "PASS" : "FAIL") << "\n";
+    oss << "================================================================================\n\n";
+    oss << "  __________________________                    __________________________\n";
+    oss << "  Faculty Mentor Signature                      Controller of Examinations\n";
+    oss << "================================================================================\n";
+    return oss.str();
 }
 
 // ---------------------------------------------------------------------------

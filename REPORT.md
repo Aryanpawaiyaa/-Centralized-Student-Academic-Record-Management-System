@@ -2,7 +2,7 @@
 
 1. [Section 1: Executive Summary & Project Context](#section-1-executive-summary--project-context)
    - 1.1 Transition from Classroom Prototype to Production Deliverable
-   - 1.2 The Problem Space: Departmental Record Management at MITS
+   - 1.2 The Problem Space: Departmental Record Management at Madhav Institute of Technology and Science
    - 1.3 Why Zero-Dependency Deployment Matters for Institutional Utility
 2. [Section 2: Developer Reference & Software Architecture](#section-2-developer-reference--software-architecture)
    - 2.1 The Three-Tier Architectural Pattern
@@ -43,7 +43,7 @@ Software projects developed in an academic setting frequently suffer from what i
 
 In Phase 5, our team set out to break this cycle with **AcademiCLI**.
 
-Over the previous four phases—gathering departmental requirements, architecting the object model, implementing core CRUD routines in C++17, and validating edge cases—we built a functional console application. However, the objective of Phase 5 is to turn that codebase into a **self-contained, fully documented, and institutional-grade tool** that a faculty coordinator or lab administrator at MITS can run immediately, without needing to install compilers, runtimes, or database engines.
+Over the previous four phases—gathering departmental requirements, architecting the object model, implementing core CRUD routines in C++17, and validating edge cases—we built a functional console application. However, the objective of Phase 5 is to turn that codebase into a **self-contained, fully documented, and institutional-grade tool** that a faculty coordinator or lab administrator at Madhav Institute of Technology and Science can run immediately, without needing to install compilers, runtimes, or database engines.
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -56,7 +56,7 @@ Over the previous four phases—gathering departmental requirements, architectin
 +-----------------------------------------------------------------------------------+
 ```
 
-## 1.2 The Problem Space: Departmental Record Management at MITS
+## 1.2 The Problem Space: Departmental Record Management at Madhav Institute of Technology and Science
 
 Within college departments, individual section coordinators (managing cohorts of 60 to 120 students) regularly handle mid-semester marks, attendance tallies, and internal evaluation reports. In practice, this work is typically handled in one of two ways:
 
@@ -102,7 +102,7 @@ This layer encapsulates core academic rules and entity modeling, completely inde
 
 - **Entity Representation:** The `Student` class represents a student record, composed of personal identification, attendance tallies, and a collection of 5 subject marks stored via the `Subject` value object.
 - **Deterministic Grade Evaluation:** Institutional grading logic is codified using compile-time constants (`GRADE_A = 85.0`, `GRADE_B = 70.0`, `GRADE_C = 55.0`, `GRADE_D = 40.0`). The system computes aggregate percentages and assigns letter grades deterministically.
-- **Attendance & Eligibility Rules:** Implements the MITS institutional requirement that students must attend $\ge 75\%$ of conducted lectures to remain eligible for term-end examinations.
+- **Attendance & Eligibility Rules:** Implements the Madhav Institute of Technology and Science institutional requirement that students must attend $\ge 75\%$ of conducted lectures to remain eligible for term-end examinations.
 - **Self-Serialization (Active Record Pattern):** The `Student` class knows how to convert its internal state into a delimited CSV record (`toCSV()`) and how to construct a valid object from a raw CSV row (`fromCSV()`).
 
 ### Tier 3: Data Access Layer (`FileManager.h` / `FileManager.cpp`)
@@ -435,7 +435,7 @@ Before packaging the release, the team completed the following verification step
 
 - **Slide 1: Title & Institutional Affiliation**
   - _Heading:_ AcademiCLI — Console-Based Academic Record Management System
-  - _Details:_ MITS Gwalior, CSBS Branch, Semester 3 OOP Project under Mr. Gulshan Soni.
+  - _Details:_ Madhav Institute of Technology and Science, Gwalior, CSBS Branch, Semester 3 OOP Project under Mr. Gulshan Soni.
 - **Slide 2: The Core Problem**
   - _Focus:_ The challenges of section-level academic records: spreadsheet formula corruption, lack of validation, and the heavy overhead of cloud ERPs for daily tasks.
 - **Slide 3: Proposed Solution**
@@ -491,7 +491,7 @@ Before packaging the release, the team completed the following verification step
 
 ### Q6: Why did you hardcode grading thresholds as `constexpr` instead of loading them from an external configuration file?
 
-**Answer:** The grading scale (A $\ge 85\%$, B $\ge 70\%$, C $\ge 55\%$, D $\ge 40\%$, F $< 40\%$) and the 75% attendance detention threshold represent official academic regulations defined by MITS university policy. These rules do not change during routine daily use. Declaring them as `static constexpr double` inside `Student.h` allows the C++ compiler to optimize comparisons directly into constant CPU instructions. It also provides intentional friction against accidental alterations by administrative clerks, ensuring that grade boundaries can only be altered through formal code maintenance.
+**Answer:** The grading scale (A $\ge 85\%$, B $\ge 70\%$, C $\ge 55\%$, D $\ge 40\%$, F $< 40\%$) and the 75% attendance detention threshold represent official academic regulations defined by Madhav Institute of Technology and Science policy. These rules do not change during routine daily use. Declaring them as `static constexpr double` inside `Student.h` allows the C++ compiler to optimize comparisons directly into constant CPU instructions. It also provides intentional friction against accidental alterations by administrative clerks, ensuring that grade boundaries can only be altered through formal code maintenance.
 
 ### Q7: What is the maximum record capacity of AcademiCLI before performance noticeably degrades?
 
@@ -629,7 +629,7 @@ _Figure 5: Grade thresholds and attendance eligibility rules implemented in Acad
 
 ## Appendix C: Prescribed Subject Catalogue
 
-The application is pre-configured with the standard Semester 3 curriculum for the Computer Science & Business Systems (CSBS) branch at MITS Gwalior:
+The application is pre-configured with the standard Semester 3 curriculum for the Computer Science & Business Systems (CSBS) branch at Madhav Institute of Technology and Science, Gwalior:
 
 | Subject Code | Course Title                      | Academic Category      | Max Marks | Passing Threshold (40%) |
 | :----------: | :-------------------------------- | :--------------------- | :-------: | :---------------------: |
@@ -643,6 +643,6 @@ The application is pre-configured with the standard Semester 3 curriculum for th
 
 ### Project Sign-off & Acknowledgments
 
-_This project was conceptualized, architected, and implemented as part of the Semester 3 Object-Oriented Programming curriculum in the Department of Computer Science & Business Systems (CSBS), Madhav Institute of Technology and Science (MITS), Gwalior._
+_This project was conceptualized, architected, and implemented as part of the Semester 3 Object-Oriented Programming curriculum in the Department of Computer Science & Business Systems (CSBS), Madhav Institute of Technology and Science, Gwalior._
 
 _Special gratitude to our faculty mentor, **Mr. Gulshan Soni**, for his continuous guidance, technical review, and encouragement throughout all five project phases._

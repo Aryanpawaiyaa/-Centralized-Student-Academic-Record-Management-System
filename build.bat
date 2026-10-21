@@ -1,7 +1,7 @@
 @echo off
 REM ============================================================================
 REM  build.bat  —  One-click build script for AcademiCLI on Windows
-REM  Requires g++ (MinGW-w64) on PATH
+REM  Supports MSVC (Visual Studio / Build Tools) and MinGW g++
 REM ============================================================================
 
 echo.
@@ -10,48 +10,57 @@ echo   AcademiCLI  -  Academic Management System  Build Script
 echo  ============================================================
 echo.
 
-REM Check for g++
-where g++ >nul 2>&1
-if %ERRORLEVEL% neq 0 (
-    echo  [ERROR] g++ not found on PATH.
-    echo          Please install MinGW-w64 and add its bin/ folder to PATH.
-    pause
-    exit /b 1
+if not exist build\bin mkdir build\bin
+if not exist build\obj mkdir build\obj
+
+REM Check if cl is available directly
+where cl >nul 2>&1
+if %ERRORLEVEL% equ 0 goto :build_msvc
+
+REM Check for Visual Studio Build Tools / IDE vcvars64.bat
+if exist "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat" (
+    call "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+    goto :build_msvc
+)
+if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" (
+    call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+    goto :build_msvc
+)
+if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat" (
+    call "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat"
+    goto :build_msvc
 )
 
-REM Create output directories
-if not exist build\obj   mkdir build\obj
-if not exist build\bin   mkdir build\bin
+REM Fallback to g++
+where g++ >nul 2>&1
+if %ERRORLEVEL% equ 0 goto :build_gcc
 
-echo  Compiling Student.cpp...
+echo  [ERROR] Neither MSVC (cl.exe) nor MinGW (g++.exe) was found on PATH.
+echo          Please ensure Visual Studio Build Tools or MinGW is installed.
+pause
+exit /b 1
+
+:build_msvc
+echo  Building with MSVC compiler (cl.exe)...
+cl /std:c++17 /EHsc /utf-8 /O2 /Iinclude src\*.cpp /Fe:build\bin\AcademiCLI.exe /Fo:build\obj\
+if %ERRORLEVEL% neq 0 goto :error
+goto :success
+
+:build_gcc
+echo  Building with MinGW GCC (g++)...
 g++ -std=c++17 -Wall -O2 -Iinclude -c src\Student.cpp       -o build\obj\Student.o
-if %ERRORLEVEL% neq 0 goto :error
-
-echo  Compiling FileManager.cpp...
 g++ -std=c++17 -Wall -O2 -Iinclude -c src\FileManager.cpp   -o build\obj\FileManager.o
-if %ERRORLEVEL% neq 0 goto :error
-
-echo  Compiling MenuController.cpp...
 g++ -std=c++17 -Wall -O2 -Iinclude -c src\MenuController.cpp -o build\obj\MenuController.o
-if %ERRORLEVEL% neq 0 goto :error
-
-echo  Compiling main.cpp...
 g++ -std=c++17 -Wall -O2 -Iinclude -c src\main.cpp          -o build\obj\main.o
+g++ -std=c++17 -o build\bin\AcademiCLI.exe build\obj\Student.o build\obj\FileManager.o build\obj\MenuController.o build\obj\main.o
 if %ERRORLEVEL% neq 0 goto :error
+goto :success
 
-echo  Linking...
-g++ -std=c++17 -o build\bin\AcademiCLI.exe ^
-    build\obj\Student.o ^
-    build\obj\FileManager.o ^
-    build\obj\MenuController.o ^
-    build\obj\main.o
-if %ERRORLEVEL% neq 0 goto :error
-
+:success
 echo.
 echo  [SUCCESS] Build complete!
-echo  Executable → build\bin\AcademiCLI.exe
+echo  Executable -^> build\bin\AcademiCLI.exe
 echo.
-
 set /p LAUNCH="  Launch now? (y/N): "
 if /i "%LAUNCH%"=="y" (
     build\bin\AcademiCLI.exe

@@ -1,0 +1,34 @@
+================================================================================
+                   MADHAV INSTITUTE OF TECHNOLOGY AND SCIENCE                   
+                          OFFICIAL ACADEMIC MARKSHEET                           
+================================================================================
+
+  Student ID       : BTCB25O1043
+  Student Name     : charitra yogi
+  Academic Session : Semester 3 (2024-2025)
+  Department       : Computer Science & Academic Management
+--------------------------------------------------------------------------------
+  ATTENDANCE RECORD
+  Total Classes    : 45
+  Classes Attended : 40
+  Attendance Pct   : 88.9%
+  Eligibility      : ELIGIBLE FOR SEMESTER EXAMINATIONS
+--------------------------------------------------------------------------------
+  COURSE PERFORMANCE & MARKS EVALUATION
+
+  Course    Subject Name                  Max Marks   Scored      Grade     
+  ----------------------------------------------------------------------------
+  CS201     Data Structures               100.00      90.00       A         
+  CS202     Object-Oriented Prog.         100.00      98.00       A         
+  CS203     Database Management           100.00      98.00       A         
+  MA201     Discrete Mathematics          100.00      98.00       A         
+  EC201     Digital Electronics           100.00      98.00       A         
+  ----------------------------------------------------------------------------
+  Aggregate Percentage : 96.40%
+  Final Letter Grade   : A (Excellent)
+  Result Status        : PASS
+================================================================================
+
+  __________________________                    __________________________
+  Faculty Mentor Signature                      Controller of Examinations
+================================================================================
