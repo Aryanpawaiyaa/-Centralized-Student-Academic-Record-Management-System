@@ -21,8 +21,8 @@ Academic CLI codebase/
 │   └── main.cpp               <- Entry point
 │
 ├── build/                     <- Generated build files (ignored by Git)
-├── exports/                   <- Generated reports; example exports included
-├── students.csv               <- Sample CSV database
+├── exports/                   <- Generated reports; example exports included 
+├── students.csv               <- Sample CSV database 
 ├── CMakeLists.txt             <- CMake build configuration
 ├── Makefile                   <- GNU Make build (g++)
 ├── build.bat                  <- Windows build script (MSVC or MinGW)
@@ -120,13 +120,6 @@ Use `make run` to build and launch, or `make clean` to remove the generated
 `build/` directory.
 
 ## Local and Generated Files
-
-- `students.csv` is a checked-in sample database. Running the application can
-  change it, so preserve or copy the sample before experimenting with edits.
-- The application writes report files under `exports/`. Existing example
-  exports are tracked; newly generated `.txt` exports are ignored by Git.
-- Build directories, compiler outputs, CMake intermediates, and IDE caches are
-  ignored. The ignore rules do not hide changes to already tracked sample files.
 
 See [REPORT.md](REPORT.md) for the project design and evaluation details.
 
